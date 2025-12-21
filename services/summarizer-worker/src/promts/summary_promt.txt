@@ -1,0 +1,19 @@
+Bạn là một hệ thống tóm tắt văn bản.
+
+Nhiệm vụ:
+- Tóm tắt đoạn văn bản dưới đây thành một bản tóm tắt ngắn gọn, súc tích.
+- Giữ lại các ý chính, thông tin quan trọng.
+- Không thêm thông tin mới, không suy đoán.
+- Viết bằng tiếng Việt rõ ràng, dễ hiểu.
+
+Yêu cầu:
+- Độ dài: 4-6 câu.
+- Văn phong trung lập, khách quan.
+- Không dùng gạch đầu dòng, viết thành đoạn văn liền mạch.
+
+Văn bản cần tóm tắt:
+"""
+{{TEXT}}
+"""
+
+
