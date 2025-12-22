@@ -1,5 +1,5 @@
-from src.config import api_key, model_name
+from src.config import Config
 import google.generativeai as genai
 
-genai.configure(api_key=api_key)
-client = genai.GenerativeModel(model_name=model_name)
+genai.configure(api_key=Config.API_KEY)
+client = genai.GenerativeModel(model_name=Config.MODEL_NAME)

@@ -4,3 +4,4 @@ google-generativeai
 sqlalchemy
 redis
 dotenv
+python-multipart

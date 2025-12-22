@@ -61,4 +61,19 @@ class Transcript(Base):
     job_id = Column(UUID(as_uuid=True), ForeignKey("transcript_jobs.id"))
 
     content = Column(Text, nullable=False)  # TEXT thay vì String
+
+    summary = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.now)
+
+
+class SumaryJob(Base):
+    __tablename__ = "summary_jobs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    transcript_job_id = Column(UUID(as_uuid=True), ForeignKey("transcript_jobs.id"))
+
+    status = Column(String(20), default="pending") # pending, processing, done, failed
+    error_message = Column(String(255), nullable=True)
+
+    started_at = Column(DateTime)
+    finished_at = Column(DateTime)
