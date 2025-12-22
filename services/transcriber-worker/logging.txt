@@ -1,0 +1,117 @@
+2025-12-22 10:34:33,920 | ERROR | fastapi | Form data requires "python-multipart" to be installed. 
+You can install "python-multipart" with: 
+
+pip install python-multipart
+
+2025-12-22 10:37:18,257 | INFO | backend | Received YouTube URL: https://www.youtube.com/watch?v=n8xX8M0U3aY
+2025-12-22 10:45:38,910 | ERROR | backend | Database connection failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')
+2025-12-22 10:47:07,359 | ERROR | backend | Database connection failed: (psycopg2.OperationalError) could not translate host name "postgresql" to address: Name or service not known
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-22 10:47:16,381 | ERROR | backend | Database connection failed: (psycopg2.OperationalError) could not translate host name "postgresql" to address: Name or service not known
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-22 10:47:27,121 | INFO | backend | Application shutdown
+2025-12-22 10:47:31,089 | ERROR | backend | Database connection failed: (psycopg2.OperationalError) could not translate host name "postgresql" to address: Name or service not known
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-22 10:48:01,513 | INFO | backend | Application shutdown
+2025-12-22 10:48:05,438 | ERROR | backend | Database connection failed: (psycopg2.OperationalError) could not translate host name "postgresql" to address: Name or service not known
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-22 10:48:14,409 | ERROR | backend | Database connection failed: (psycopg2.OperationalError) could not translate host name "postgresql" to address: Name or service not known
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-22 10:48:28,578 | INFO | backend | Application shutdown
+2025-12-22 10:48:32,595 | ERROR | backend | Database connection failed: (psycopg2.OperationalError) could not translate host name "postgresql" to address: Name or service not known
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-22 10:48:39,044 | INFO | backend | Application shutdown
+2025-12-22 10:48:43,137 | ERROR | backend | Database connection failed: (psycopg2.OperationalError) could not translate host name "postgresql" to address: Name or service not known
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-22 10:51:04,810 | INFO | backend | Application shutdown
+2025-12-22 10:51:49,533 | ERROR | backend | Database connection failed: (psycopg2.OperationalError) could not translate host name "postgresql" to address: Name or service not known
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-22 10:59:29,614 | ERROR | backend | Database connection failed: (psycopg2.OperationalError) could not translate host name "postgresql" to address: Name or service not known
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-22 11:05:50,195 | INFO | backend | Application shutdown
+2025-12-22 11:05:54,233 | INFO | backend | Database connected successfully
+2025-12-22 11:06:36,877 | INFO | backend | Received YouTube URL: https://www.youtube.com/watch?v=n8xX8M0U3aY
+2025-12-22 11:10:20,852 | INFO | backend | Application shutdown
+2025-12-22 11:10:22,934 | INFO | backend | Database connected successfully
+2025-12-22 11:10:42,595 | INFO | backend | Received YouTube URL: https://www.youtube.com/watch?v=n8xX8M0U3aY
+2025-12-22 11:19:30,510 | INFO | backend | Application shutdown
+2025-12-22 11:19:32,220 | INFO | backend | Database connected successfully
+2025-12-22 11:19:37,629 | INFO | backend | Received YouTube URL: https://www.youtube.com/watch?v=n8xX8M0U3aY
+2025-12-22 11:23:22,257 | INFO | backend | Application shutdown
+2025-12-22 11:23:24,364 | INFO | backend | Database connected successfully
+2025-12-22 11:24:12,843 | INFO | backend | Application shutdown
+2025-12-22 11:24:14,162 | INFO | backend | Database connected successfully
+2025-12-22 11:24:24,521 | INFO | backend | Received YouTube URL: https://www.youtube.com/watch?v=n8xX8M0U3aY
+2025-12-22 11:24:24,581 | INFO | backend | Created video c434e8dc-75de-411f-9a85-083d7a585a1a and video_source ee8e63f8-cd13-4aab-b442-6c18b4bcbc67 for YouTube URL
+2025-12-22 11:25:20,556 | INFO | backend | Create transcript job for video c434e8dc-75de-411f-9a85-083d7a585a1a
+2025-12-22 11:25:20,568 | INFO | backend | Start transcribing job b3161045-b944-48fe-ac9a-fd34e07e5f1e
+2025-12-22 11:25:20,568 | INFO | backend | Finished job b3161045-b944-48fe-ac9a-fd34e07e5f1e
+2025-12-22 11:30:07,680 | INFO | backend | Application shutdown
+2025-12-22 11:30:09,081 | INFO | backend | Database connected successfully
+2025-12-22 11:30:23,371 | INFO | backend | Application shutdown
+2025-12-22 11:30:24,844 | INFO | backend | Database connected successfully
+2025-12-22 11:31:18,471 | INFO | backend | Application shutdown
+2025-12-22 11:31:19,864 | INFO | backend | Database connected successfully
+2025-12-22 11:31:34,442 | INFO | backend | Application shutdown
+2025-12-22 11:31:35,778 | INFO | backend | Database connected successfully
+2025-12-22 11:32:02,034 | INFO | backend | Create transcript job for video c434e8dc-75de-411f-9a85-083d7a585a1a
+2025-12-22 11:32:02,073 | INFO | backend | Start transcribing job 8d7df66b-2829-4853-b11b-9425406a1004
+2025-12-22 11:32:02,073 | INFO | backend | Finished job 8d7df66b-2829-4853-b11b-9425406a1004
+2025-12-22 11:32:26,325 | INFO | backend | Application shutdown
+2025-12-22 11:32:27,888 | INFO | backend | Database connected successfully
+2025-12-22 11:32:33,658 | INFO | backend | Application shutdown
+2025-12-22 11:32:35,268 | INFO | backend | Database connected successfully
+2025-12-22 11:33:06,814 | INFO | backend | Application shutdown
+2025-12-22 11:33:08,271 | INFO | backend | Database connected successfully
+2025-12-22 11:34:03,893 | INFO | backend | Application shutdown
+2025-12-22 11:34:05,352 | INFO | backend | Database connected successfully
+2025-12-22 11:38:43,537 | INFO | backend | Application shutdown
+2025-12-22 11:38:45,771 | INFO | backend | Database connected successfully
+2025-12-22 11:39:54,134 | INFO | backend | Application shutdown
+2025-12-22 11:39:55,459 | INFO | backend | Database connected successfully
+2025-12-22 11:42:26,148 | INFO | backend | Application shutdown
+2025-12-22 11:42:27,499 | INFO | backend | Database connected successfully
+2025-12-22 11:44:46,506 | INFO | backend | Application shutdown
+2025-12-22 11:44:48,234 | INFO | backend | Database connected successfully
+2025-12-22 11:45:17,674 | INFO | backend | Application shutdown
+2025-12-22 11:45:19,277 | INFO | backend | Database connected successfully
+2025-12-22 11:45:35,990 | INFO | backend | Application shutdown
+2025-12-22 11:45:37,365 | INFO | backend | Database connected successfully
+2025-12-22 11:45:53,351 | INFO | backend | Application shutdown
+2025-12-22 11:46:03,161 | INFO | backend | Database connected successfully
+2025-12-22 11:46:29,450 | INFO | backend | Received YouTube URL: https://www.youtube.com/watch?v=n8xX8M0U3aY
+2025-12-22 11:46:29,466 | INFO | backend | YouTube URL already exists in DB for video c434e8dc-75de-411f-9a85-083d7a585a1a
+2025-12-22 11:46:40,470 | INFO | backend | Create transcript job for video c434e8dc-75de-411f-9a85-083d7a585a1a
+2025-12-22 11:46:40,505 | INFO | backend | Start transcribing job 1d8f96d7-d9fb-483d-ad46-ae12189cd63f
+2025-12-22 11:48:52,612 | INFO | backend | Running whisper on https://www.youtube.com/watch?v=n8xX8M0U3aY
+2025-12-22 11:51:23,459 | INFO | backend | Application shutdown
+2025-12-22 11:51:32,904 | INFO | backend | Database connected successfully
+2025-12-22 11:51:38,573 | INFO | backend | Application shutdown
+2025-12-22 11:51:44,044 | INFO | backend | Database connected successfully
+2025-12-22 11:52:09,280 | INFO | backend | Application shutdown
+2025-12-22 11:52:13,787 | INFO | backend | Database connected successfully
+2025-12-22 11:53:14,480 | INFO | backend | Application shutdown
+2025-12-22 11:53:23,126 | INFO | backend | Database connected successfully
+2025-12-22 11:54:09,746 | INFO | backend | Received YouTube URL: https://www.youtube.com/watch?v=n8xX8M0U3aY
+2025-12-22 11:54:09,765 | INFO | backend | YouTube URL already exists in DB for video c434e8dc-75de-411f-9a85-083d7a585a1a
+2025-12-22 11:54:23,170 | INFO | backend | Create transcript job for video c434e8dc-75de-411f-9a85-083d7a585a1a
+2025-12-22 11:54:23,199 | INFO | backend | Start transcribing job 4b26be3e-273c-4d49-b96c-922fca6add55
+2025-12-22 11:57:54,028 | INFO | backend | Application shutdown
+2025-12-22 11:58:01,112 | INFO | backend | Database connected successfully
+2025-12-22 11:58:01,120 | INFO | backend | Received YouTube URL: https://www.youtube.com/watch?v=n8xX8M0U3aY
+2025-12-22 11:58:01,129 | INFO | backend | YouTube URL already exists in DB for video c434e8dc-75de-411f-9a85-083d7a585a1a
+2025-12-22 11:58:08,876 | INFO | backend | Create transcript job for video c434e8dc-75de-411f-9a85-083d7a585a1a
+2025-12-22 11:58:08,890 | INFO | backend | Start transcribing job e9f0ef34-b86f-4ad9-99c4-50273db225c3
+2025-12-22 11:58:08,949 | INFO | backend | Downloading YouTube audio
+2025-12-22 12:00:44,097 | INFO | backend | Running whisper on ./src/videos\2f3e5796-2f9f-40c8-bd00-92069283faa8.mp3
+2025-12-22 12:02:03,853 | INFO | backend | Finished job e9f0ef34-b86f-4ad9-99c4-50273db225c3
+2025-12-22 12:03:29,723 | INFO | backend | Application shutdown
