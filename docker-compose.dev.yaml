@@ -157,7 +157,7 @@ services:
       SMTP_PORT: 1025
       EMAIL_FROM: noreply@tubemind.local
       # Whisper
-      WHISPER_MODEL_SIZE: base
+      WHISPER_MODEL_SIZE: turbo
       TEMP_DIR: /tmp/tubemind
       # Logging
       LOG_LEVEL: INFO
