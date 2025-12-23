@@ -115,3 +115,30 @@ pip install python-multipart
 2025-12-22 12:00:44,097 | INFO | backend | Running whisper on ./src/videos\2f3e5796-2f9f-40c8-bd00-92069283faa8.mp3
 2025-12-22 12:02:03,853 | INFO | backend | Finished job e9f0ef34-b86f-4ad9-99c4-50273db225c3
 2025-12-22 12:03:29,723 | INFO | backend | Application shutdown
+2025-12-22 17:45:30,765 | INFO | backend | Database connected successfully
+2025-12-22 17:46:47,543 | INFO | backend | Application shutdown
+2025-12-22 17:47:00,821 | INFO | backend | Database connected successfully
+2025-12-22 17:53:58,885 | INFO | backend | Received YouTube URL: https://www.youtube.com/watch?v=Gp340_5dT5g
+2025-12-22 17:53:59,243 | INFO | backend | Created video 11519cff-00ff-4ede-be23-3da1eacda855 and video_source 49644287-457f-4a4e-bfe7-0b0a71d3956d for YouTube URL
+2025-12-22 17:54:09,345 | INFO | backend | Create transcript job for video 11519cff-00ff-4ede-be23-3da1eacda855
+2025-12-22 17:54:09,436 | INFO | backend | Start transcribing job 08aa6c23-f84e-4462-8feb-230a78732636
+2025-12-22 17:54:09,447 | INFO | backend | Downloading YouTube audio
+2025-12-22 17:56:32,744 | INFO | backend | Running whisper on ./src/videos\ecf3a821-66b0-4c56-b345-31dc5fbb74ab.mp3
+2025-12-22 17:57:36,420 | INFO | backend | Finished job 08aa6c23-f84e-4462-8feb-230a78732636
+2025-12-22 18:01:02,753 | INFO | backend | Received YouTube URL: https://www.youtube.com/watch?v=voypO0L4knM
+2025-12-22 18:01:02,980 | INFO | backend | Created video 33ebcd21-bf93-40ec-9de6-8a0383c7e1fe and video_source 49d1f5bc-a38c-4b81-8eff-eb061e7542a8 for YouTube URL
+2025-12-22 18:01:12,659 | INFO | backend | Create transcript job for video 33ebcd21-bf93-40ec-9de6-8a0383c7e1fe
+2025-12-22 18:01:12,699 | INFO | backend | Start transcribing job 31f466cc-ccc5-47c0-ab41-8af567c740fd
+2025-12-22 18:01:12,918 | INFO | backend | Downloading YouTube audio
+2025-12-22 18:01:51,481 | INFO | backend | Running whisper on ./src/videos\6996b25a-a805-4881-a7ee-4cb03cfa0bd2.mp3
+2025-12-22 18:02:19,994 | INFO | backend | Finished job 31f466cc-ccc5-47c0-ab41-8af567c740fd
+2025-12-22 18:04:41,820 | INFO | backend | Create transcript job for video 33ebcd21-bf93-40ec-9de6-8a0383c7e1fe
+2025-12-22 18:04:42,015 | INFO | backend | Start transcribing job 0c8b2588-981c-44d6-bf7e-2e440031c6dd
+2025-12-22 18:04:42,053 | INFO | backend | Downloading YouTube audio
+2025-12-22 18:06:47,667 | INFO | backend | Running whisper on ./src/videos\1f7821a9-4555-4b00-bee8-ba97ea4e053c.mp3
+2025-12-22 18:07:46,134 | INFO | backend | Finished job 0c8b2588-981c-44d6-bf7e-2e440031c6dd
+2025-12-22 18:10:34,815 | INFO | backend | Application shutdown
+2025-12-22 18:10:47,216 | INFO | backend | Database connected successfully
+2025-12-22 18:11:43,389 | INFO | backend | Application shutdown
+2025-12-22 18:11:52,409 | INFO | backend | Database connected successfully
+2025-12-22 18:23:06,803 | INFO | backend | Application shutdown

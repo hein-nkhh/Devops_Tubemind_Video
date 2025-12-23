@@ -179,7 +179,7 @@ def run_transcribe(job_id: str):
     db = SessionLocal()
 
     try:
-        # 1️⃣ Lấy job
+        #  Lấy job
         job = db.query(TranscriptJob).filter(
             TranscriptJob.id == job_id
         ).first()
@@ -188,7 +188,7 @@ def run_transcribe(job_id: str):
             logger.error("TranscriptJob not found")
             return
 
-        # 2️⃣ Lấy video
+        #  Lấy video
         video = db.query(Video).filter(
             Video.id == job.video_id
         ).first()
@@ -196,14 +196,14 @@ def run_transcribe(job_id: str):
         if not video:
             raise Exception("Video not found")
 
-        # 3️⃣ Xác định audio path
+        #  Xác định audio path
         if video.file_path.startswith("http"):
             logger.info("Downloading YouTube audio")
             audio_path = download_youtube_audio(video.file_path)
         else:
             audio_path = video.file_path
 
-        # 4️⃣ Load whisper
+        # Load whisper
         model = whisper.load_model(job.whisper_model)
 
         logger.info(f"Running whisper on {audio_path}")
@@ -214,7 +214,7 @@ def run_transcribe(job_id: str):
 
         transcript_text = result["text"]
 
-        # 5️⃣ Save transcript
+        # Save transcript
         transcript = Transcript(
             job_id=job.id,
             content=transcript_text,
@@ -222,7 +222,7 @@ def run_transcribe(job_id: str):
         )
         db.add(transcript)
 
-        # 6️⃣ Update job
+        # Update job
         job.status = "done"
         job.finished_at = datetime.now()
 
