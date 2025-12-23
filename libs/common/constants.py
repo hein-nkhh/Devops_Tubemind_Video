@@ -1,0 +1,11 @@
+QUEUE_TRANSCRIBE = "queue:transcribe"
+QUEUE_SUMMARIZE = "queue:summarize"
+QUEUE_NOTIFY = "queue:notify"
+
+STATUS_PENDING = "pending"
+STATUS_PROCESSING = "processing"
+STATUS_COMPLETED = "completed"
+STATUS_FAILED = "failed"
+
+NOTIF_TRANSCRIPTION_DONE = "transcription_done"
+NOTIF_SUMMARY_DONE = "summary_done"
