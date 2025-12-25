@@ -212,7 +212,3 @@ __marimo__/
 postgres_data/
 minio_data/
 transcriber_temp/
-
-services/api-gateway/
-services/notifier-service/
-services/*-worker/
