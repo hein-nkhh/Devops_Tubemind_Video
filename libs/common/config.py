@@ -36,5 +36,10 @@ class Settings(BaseSettings):
     )
     
 
-settings = Settings()
+# settings = Settings()
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ENV_FILE = os.path.join(ROOT_DIR, ".env.local")
+settings = Settings(_env_file=ENV_FILE)
+
 print(">>> DATABASE_URL FROM CONFIG =", settings.DATABASE_URL)

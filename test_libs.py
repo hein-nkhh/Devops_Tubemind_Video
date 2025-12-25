@@ -140,8 +140,8 @@ def test_email():
          
 if __name__ == "__main__":
     # test_config()
-    # test_database()
+    test_database()
     # test_redis()
     # test_redis_visible()
     # test_minio()
-    test_email()
+    # test_email()
