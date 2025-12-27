@@ -212,11 +212,14 @@ __marimo__/
 postgres_data/
 minio_data/
 transcriber_temp/
-terraform-admin_accessKeys (1).csv
-terraform-admin_credentials.csv
+
+# ============================================
+# Terraform - Loại bỏ files và thư mục nặng
+# ============================================
 
 # Loại bỏ thư mục cài đặt plugin/provider (Đây là nguyên nhân gây lỗi 768MB)
 **/.terraform/*
+**/.terraform.lock.hcl
 
 # Loại bỏ các file lưu trạng thái hạ tầng (Chứa thông tin nhạy cảm và không nên share qua Git)
 *.tfstate
@@ -225,9 +228,97 @@ terraform-admin_credentials.csv
 # Loại bỏ các file biến chứa secret (Nếu bạn đặt tên là terraform.tfvars)
 *.tfvars
 *.tfvars.json
+**/terraform.tfvars
+**/terraform.tfvars.json
 
-# Loại bỏ các file log
+# Override files cho terraform
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform CLI configuration
+.terraformrc
+terraform.rc
+
+# ============================================
+# File Credentials - QUAN TRỌNG BẢO MẬT
+# ============================================
+*credentials*.csv
+*accessKeys*.csv
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+.secrets/
+
+# ============================================
+# Docker - Loại bỏ files và thư mục nặng
+# ============================================
+# Volumes và data directories
+**/volumes/
+**/docker-volumes/
+*_data/
+*-data/
+
+# ============================================
+# Node.js / Front-end (nếu có)
+# ============================================
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# ============================================
+# IDE & Editor files
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============================================
+# Logs & Temporary files
+# ============================================
 *.log
-
-# Loại bỏ các file backup
+logs/
+*.tmp
+*.temp
+*.bak
 *.backup
+
+# ============================================
+# OS specific
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ============================================
+# Database dumps
+# ============================================
+*.sql
+*.dump
+*.db-journal
