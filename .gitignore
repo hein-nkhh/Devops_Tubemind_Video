@@ -212,3 +212,5 @@ __marimo__/
 postgres_data/
 minio_data/
 transcriber_temp/
+terraform-admin_accessKeys (1).csv
+terraform-admin_credentials.csv
