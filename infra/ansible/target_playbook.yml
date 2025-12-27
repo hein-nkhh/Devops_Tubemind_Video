@@ -1,0 +1,69 @@
+---
+# ==========================================
+# PLAY 2: TARGET SERVER (K3s + ArgoCD)
+# ==========================================
+- name: Setup Target K8s Cluster
+  hosts: target_servers
+  become: true
+
+  tasks:
+    # -----------------------------
+    # INSTALL K3S
+    # -----------------------------
+    - name: Install K3s
+      shell: curl -sfL https://get.k3s.io | sh -s -- --write-kubeconfig-mode 644
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for K3s API ready
+      shell: k3s kubectl get nodes
+      register: k3s_ready
+      retries: 10
+      delay: 10
+      until: k3s_ready.rc == 0
+
+    # -----------------------------
+    # ARGOCD
+    # -----------------------------
+    - name: Create ArgoCD namespace
+      shell: k3s kubectl create namespace argocd
+      ignore_errors: true
+
+    - name: Install ArgoCD
+      shell: k3s kubectl apply -n argocd --validate=false -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+    - name: Patch ArgoCD Service to NodePort
+      shell: |
+        k3s kubectl patch svc argocd-server -n argocd -p '{
+          "spec": {
+            "type": "NodePort",
+            "ports": [ {
+              "port": 443,
+              "targetPort": 8080,
+              "nodePort": 30443
+            } ]
+          }
+        }'
+
+    # -----------------------------
+    # ARGOCD CLI
+    # -----------------------------
+    - name: Install ArgoCD CLI
+      shell: |
+        curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        install -m 555 argocd /usr/local/bin/argocd
+        rm argocd
+      args:
+        creates: /usr/local/bin/argocd
+
+    # -----------------------------
+    # GET ADMIN PASSWORD
+    # -----------------------------
+    - name: Get ArgoCD admin password
+      shell: k3s kubectl -n argocd get secret argocd-initial-admin-secret \
+             -o jsonpath="{.data.password}" | base64 -d
+      register: argocd_pass
+
+    - name: Show ArgoCD password
+      debug:
+        msg: "ArgoCD admin password: {{ argocd_pass.stdout }}"

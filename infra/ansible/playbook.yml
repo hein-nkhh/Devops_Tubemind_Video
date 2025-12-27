@@ -1,0 +1,214 @@
+---
+# ==========================================
+# PLAY 1: CI SERVER (Docker, Jenkins, Sonar, Helm, Trivy)
+# ==========================================
+- name: Setup CI Server
+  hosts: ci_servers
+  become: true
+  vars:
+    workdir: /home/ec2-user/ci
+
+  tasks:
+    # -----------------------------
+    # INSTALL DOCKER
+    # -----------------------------
+    - name: Install Docker on Amazon Linux 2023
+      dnf:
+        name: docker
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add ec2-user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    # -----------------------------
+    # DOCKER COMPOSE PLUGIN
+    # -----------------------------
+    - name: Install Docker Compose plugin v2
+      shell: |
+        mkdir -p /usr/local/lib/docker/cli-plugins
+        curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 \
+          -o /usr/local/lib/docker/cli-plugins/docker-compose
+        chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+      args:
+        creates: /usr/local/lib/docker/cli-plugins/docker-compose
+
+    # -----------------------------
+    # SONAR REQUIREMENT
+    # -----------------------------
+    - name: Set vm.max_map_count for SonarQube
+      sysctl:
+        name: vm.max_map_count
+        value: '262144'
+        state: present
+        reload: yes
+
+    # -----------------------------
+    # WORKDIR
+    # -----------------------------
+    - name: Create CI working directory
+      file:
+        path: "{{ workdir }}"
+        state: directory
+        owner: ec2-user
+        mode: '0755'
+
+    - name: Copy Docker Compose file
+      copy:
+        src: ./files/docker-compose.yml
+        dest: "{{ workdir }}/docker-compose.yml"
+        owner: ec2-user
+
+    - name: Run Jenkins & SonarQube
+      shell: docker compose up -d
+      args:
+        chdir: "{{ workdir }}"
+
+    # -----------------------------
+    # HELM INSTALL
+    # -----------------------------
+    - name: Install Helm CLI
+      shell: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      args:
+        creates: /usr/local/bin/helm
+
+    # -----------------------------
+    # TRIVY INSTALL
+    # -----------------------------
+    - name: Install Trivy
+      shell: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+      args:
+        creates: /usr/local/bin/trivy
+
+
+# ==========================================
+# PLAY 2: TARGET SERVER (K3s + ArgoCD)
+# ==========================================
+- name: Setup Target K8s Cluster
+  hosts: target_servers
+  become: true
+
+  tasks:
+    # -----------------------------
+    # INSTALL K3S
+    # -----------------------------
+    - name: Install K3s
+      shell: curl -sfL https://get.k3s.io | sh -s -- --write-kubeconfig-mode 644
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for K3s API ready
+      shell: k3s kubectl get nodes
+      register: k3s_ready
+      retries: 10
+      delay: 10
+      until: k3s_ready.rc == 0
+
+    # -----------------------------
+    # ARGOCD
+    # -----------------------------
+    - name: Create ArgoCD namespace
+      shell: k3s kubectl create namespace argocd
+      ignore_errors: true
+
+    - name: Install ArgoCD
+      shell: |
+        k3s kubectl apply -n argocd \
+        -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+    - name: Patch ArgoCD Service to NodePort
+      shell: |
+        k3s kubectl patch svc argocd-server -n argocd -p '{
+          "spec": {
+            "type": "NodePort",
+            "ports": [ {
+              "port": 443,
+              "targetPort": 8080,
+              "nodePort": 30443
+            }]
+          }
+        }'
+
+    # # -----------------------------
+    # # ARGOCD CLI
+    # # -----------------------------
+    # - name: Install ArgoCD CLI
+    #   shell: |
+    #     curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+    #     install -m 555 argocd /usr/local/bin/argocd
+    #     rm argocd
+    #   args:
+    #     creates: /usr/local/bin/argocd
+
+    # # -----------------------------
+    # # GET ADMIN PASSWORD
+    # # -----------------------------
+    # - name: Get ArgoCD admin password
+    #   shell: |
+    #     k3s kubectl -n argocd get secret argocd-initial-admin-secret \
+    #     -o jsonpath="{.data.password}" | base64 -d
+    #   register: argocd_pass
+
+    # - name: Show ArgoCD password
+    #   debug:
+    #     msg: "ArgoCD admin password: {{ argocd_pass.stdout }}"
+    # ==============================
+    # ARGOCD INSTALL ON TARGET SERVER
+    # ==============================
+    - name: Wait until K3s API is ready
+      shell: |
+        kubectl get nodes --no-headers | awk '{print $2}' | grep -qv 'NotReady'
+      register: k3s_ready
+      retries: 15
+      delay: 10
+      until: k3s_ready.rc == 0
+
+    - name: Create ArgoCD namespace
+      shell: k3s kubectl create namespace argocd
+      ignore_errors: true
+
+    - name: Install ArgoCD with validation off
+      shell: k3s kubectl apply -n argocd \
+            -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml \
+            --validate=false
+
+    - name: Patch ArgoCD Service to NodePort
+      shell: |
+        k3s kubectl patch svc argocd-server -n argocd -p '{
+          "spec": {
+            "type": "NodePort",
+            "ports": [{
+              "port": 443,
+              "targetPort": 8080,
+              "nodePort": 30443
+            }]
+          }
+        }'
+
+    - name: Install ArgoCD CLI
+      shell: |
+        curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        install -m 555 argocd /usr/local/bin/argocd
+        rm argocd
+      args:
+        creates: /usr/local/bin/argocd
+
+    - name: Get ArgoCD admin password
+      shell: |
+        k3s kubectl -n argocd get secret argocd-initial-admin-secret \
+        -o jsonpath="{.data.password}" | base64 -d
+      register: argocd_pass
+
+    - name: Show ArgoCD admin password
+      debug:
+        msg: "ArgoCD admin password: {{ argocd_pass.stdout }}"
+

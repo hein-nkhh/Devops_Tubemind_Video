@@ -1,0 +1,80 @@
+# version: '3.8'
+# services:
+#   jenkins:
+#     image: jenkins/jenkins:lts
+#     container_name: jenkins
+#     restart: always
+#     privileged: true
+#     user: root
+#     ports:
+#       - "8081:8080"
+#       - "50000:50000"
+#     volumes:
+#       - jenkins_data:/var/jenkins_home
+#       - /var/run/docker.sock:/var/run/docker.sock
+#     networks:
+#       - ci_net
+
+#   sonarqube:
+#     image: sonarqube:lts-community
+#     container_name: sonarqube
+#     restart: always
+#     ports:
+#       - "9001:9000"
+#     environment:
+#       - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+#     volumes:
+#       - sonar_data:/opt/sonarqube/data
+#       - sonar_extensions:/opt/sonarqube/extensions
+#     networks:
+#       - ci_net
+
+# volumes:
+#   jenkins_data:
+#   sonar_data:
+#   sonar_extensions:
+
+# networks:
+#   ci_net:
+#     driver: bridge
+
+version: '3.8'
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    restart: always
+    privileged: true
+    user: root
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - ci_net
+
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: sonarqube
+    restart: always
+    ports:
+      - "9001:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+      - SONARQUBE_JAVA_OPTS=-Xms512m -Xmx1024m
+    volumes:
+      - sonar_data:/opt/sonarqube/data
+      - sonar_extensions:/opt/sonarqube/extensions
+    networks:
+      - ci_net
+
+volumes:
+  jenkins_data:
+  sonar_data:
+  sonar_extensions:
+
+networks:
+  ci_net:
+    driver: bridge
