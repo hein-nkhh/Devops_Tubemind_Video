@@ -1,0 +1,5 @@
+SQLAlchemy
+fastapi
+uvicorn
+google-genai
+dotenv
