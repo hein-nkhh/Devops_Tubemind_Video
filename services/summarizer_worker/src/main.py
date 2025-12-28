@@ -13,7 +13,7 @@ from libs.common.database import SessionLocal
 from libs.common.models import VideoTask
 from libs.common.logger import get_logger
 from libs.common.redis_client import redis_client
-from libs.common.constants import QUEUE_SUMMARIZE, STATUS_SUMMARIZING, STATUS_COMPLETED
+from libs.common.constants import QUEUE_SUMMARIZE, STATUS_SUMMARIZING, STATUS_COMPLETED, QUEUE_NOTIFIER
 
 # from core import SummarizeEngine # run local
 from src.core import SummarizeEngine # run docker
@@ -44,6 +44,17 @@ def process_task(engine: SummarizeEngine, task_payload: dict):
         task.status = STATUS_COMPLETED
         db.commit()
         logger.info(f"Summary saved for Task {task_id}")
+
+        notifier_payload = {
+            "id": task.id,
+            "service": "summarizer",
+            "status": STATUS_COMPLETED,
+            "email": task.email,
+            "object_minio_name": task.minio_object_name,
+        }
+
+        redis_client.push_task(QUEUE_NOTIFIER, notifier_payload)
+        logger.info(f"Pushed notifier message for task {task_id}")
 
     except Exception as e:
         logger.error(f"Failed task {task_id}: {e}")

@@ -19,7 +19,8 @@ from libs.common.constants import (
     STATUS_COMPLETED, 
     STATUS_FAILED,
     STATUS_TRANSCRIBING,
-    STATUS_TRANSCRIPTION_DONE
+    STATUS_TRANSCRIPTION_DONE,
+    QUEUE_NOTIFIER
 )
 
 # from core import TranscriberEngine # run local
@@ -78,6 +79,19 @@ def process_task(engine: TranscriberEngine, task_payload: dict):
         task_record.status = STATUS_TRANSCRIPTION_DONE
         db.commit()
         logger.info(f"Transcription finished for Task {task_id}")
+
+        # 5. Push notify message
+        notifier_payload = {
+            "id": task_id,
+            "service": "transcriber",
+            "email": task_record.email,
+            "status": task_record.status,
+            "object_minio_name": task_record.minio_object_name
+        }
+
+        redis_client.push_task(QUEUE_NOTIFIER, notifier_payload)
+        logger.info(f"Pushed notification to {QUEUE_NOTIFIER}: {notifier_payload}")
+
 
         # 5. Push message to next queue (Summarize Worker)
         # next_payload = {
