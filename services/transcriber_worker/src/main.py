@@ -17,11 +17,13 @@ from libs.common.constants import (
     QUEUE_SUMMARIZE, 
     STATUS_PROCESSING, 
     STATUS_COMPLETED, 
-    STATUS_FAILED
+    STATUS_FAILED,
+    STATUS_TRANSCRIBING,
+    STATUS_TRANSCRIPTION_DONE
 )
 
-from core import TranscriberEngine # run local
-# from .core import TranscriberEngine # run in docker
+# from core import TranscriberEngine # run local
+from src.core import TranscriberEngine # run in docker
 
 logger = get_logger("transcriber-worker")
 
@@ -41,7 +43,7 @@ def process_task(engine: TranscriberEngine, task_payload: dict):
             return
 
         # 1. Update status -> processing
-        task_record.status = STATUS_PROCESSING
+        task_record.status = STATUS_TRANSCRIBING
         db.commit()
 
         # 2. Phân loại và lấy file về Local
@@ -73,18 +75,18 @@ def process_task(engine: TranscriberEngine, task_payload: dict):
 
         # 4. Update DB -> completed
         task_record.transcript = transcript_text
-        task_record.status = STATUS_COMPLETED
+        task_record.status = STATUS_TRANSCRIPTION_DONE
         db.commit()
         logger.info(f"Transcription finished for Task {task_id}")
 
         # 5. Push message to next queue (Summarize Worker)
-        next_payload = {
-            "id": task_id,
-            "transcript": transcript_text,
-            "message": "Please summarize this"
-        }
-        redis_client.push_task(QUEUE_SUMMARIZE, next_payload)
-        logger.info(f"Pushed to {QUEUE_SUMMARIZE}")
+        # next_payload = {
+        #     "id": task_id,
+        #     "transcript": transcript_text,
+        #     "message": "Please summarize this"
+        # }
+        # redis_client.push_task(QUEUE_SUMMARIZE, next_payload)
+        # logger.info(f"Pushed to {QUEUE_SUMMARIZE}")
 
     except Exception as e:
         logger.error(f"Failed to process task {task_id}: {e}", exc_info=True)

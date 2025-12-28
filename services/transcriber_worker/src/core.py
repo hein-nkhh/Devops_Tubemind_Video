@@ -1,4 +1,5 @@
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 import sys
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
@@ -28,8 +29,8 @@ class TranscriberEngine:
 
     def _load_whisper_model(self):
         model_name = settings.WHISPER_MODEL_SIZE
-        logger.info(f"Loading Whisper model: {model_name}...")
-        return whisper.load_model(model_name, download_root=str(WHISPER_CACHE_DIR))
+        logger.info(f"Loading Whisper model: {model_name}... (CPU)")
+        return whisper.load_model(model_name, device="cpu", download_root=str(WHISPER_CACHE_DIR))
 
     def download_file_from_minio(self, object_name: str) -> str:
         local_filename = os.path.basename(object_name)

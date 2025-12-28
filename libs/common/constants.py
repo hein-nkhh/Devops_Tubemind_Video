@@ -3,7 +3,10 @@ QUEUE_SUMMARIZE = "queue:summarize"
 QUEUE_NOTIFY = "queue:notify"
 
 STATUS_PENDING = "pending"
+STATUS_TRANSCRIBING = "transcribing"
+STATUS_TRANSCRIPTION_DONE = "transcription_done"
 STATUS_PROCESSING = "processing"
+STATUS_SUMMARIZING = "summarizing"
 STATUS_COMPLETED = "completed"
 STATUS_FAILED = "failed"
 

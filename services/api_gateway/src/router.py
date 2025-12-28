@@ -14,10 +14,13 @@ from libs.common.database import get_db, init_db
 from libs.common.models import VideoTask
 from libs.common.minio_client import minio_client
 from libs.common.redis_client import redis_client
-from libs.common.constants import QUEUE_TRANSCRIBE, STATUS_PENDING
+from libs.common.constants import QUEUE_TRANSCRIBE, QUEUE_SUMMARIZE, STATUS_PENDING, STATUS_TRANSCRIPTION_DONE, STATUS_COMPLETED, STATUS_SUMMARIZING
+from libs.common.logger import get_logger
 
-# from schemas import TaskResponse, LinkInput # run local
-from .schemas import TaskResponse, LinkInput # run in docker
+logger = get_logger("api_gateway")
+
+# from schemas import TaskResponse, LinkInput, SummarizeRequest # run local
+from .schemas import TaskResponse, LinkInput, SummarizeRequest # run in docker
 
 
 router = APIRouter()
@@ -59,15 +62,12 @@ async def upload_video(
         }
         redis_client.push_task(QUEUE_TRANSCRIBE, message_payload)
 
-        return TaskResponse(
-            id=new_task.id,
-            status="queued",
-            message="Video uploaded and queued for processing",
-            minio_object_name=object_name
-        )
+        new_task.message = "Video saved and queued for processing"
+        
+        return new_task
 
     except Exception as e:
-        print(f"Error processing video: {e}")
+        logger.error(f"Error processing video upload: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/upload/link", response_model=TaskResponse)
@@ -103,13 +103,98 @@ async def upload_link(
         }
         redis_client.push_task(QUEUE_TRANSCRIBE, message_payload)
 
-        return TaskResponse(
-            id=new_task.id,
-            status="queued",
-            message="Link saved and queued for processing",
-            minio_object_name=object_name
-        )
+        new_task.message = "Link saved and queued for processing"
+        
+        # return TaskResponse(
+        #     id=new_task.id,
+        #     status="queued",
+        #     message="Link saved and queued for processing",
+        #     minio_object_name=object_name
+        # )
+        return new_task
 
     except Exception as e:
-        print(f"Error processing link: {e}")
+        logger.error(f"Error processing link upload: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/tasks/{task_id}", response_model=TaskResponse)
+def get_task_status(task_id: int, db: Session = Depends(get_db)):
+    task = db.query(VideoTask).filter(VideoTask.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return task
+
+@router.post("/process/summarize/{task_id}", response_model=TaskResponse)
+def trigger_summarize(task_id: int, db: Session = Depends(get_db)):
+    # 1. Tìm task
+    task = db.query(VideoTask).filter(VideoTask.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    valid_statuses = [STATUS_TRANSCRIPTION_DONE, STATUS_COMPLETED]
+    
+    # 2. Validate: Phải có transcript rồi mới tóm tắt được
+    if task.status not in valid_statuses:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Task is in {task.status} state. Cannot summarize yet."
+        )
+
+    try:
+        # 3. Bắn message vào Redis Queue Summarize
+        task.status = STATUS_SUMMARIZING
+        db.commit()
+        
+        payload = {
+            "id": task.id,
+            "message": "Trigger manual summary"
+        }
+        redis_client.push_task(QUEUE_SUMMARIZE, payload)
+        
+        # 4. Trả về thông báo
+        return task # Trả về task hiện tại, FE sẽ thấy status cũ nhưng biết là đã gửi lệnh
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/process/summarize-latest", response_model=TaskResponse)
+def trigger_summarize_by_user(
+    request: SummarizeRequest, 
+    db: Session = Depends(get_db)
+):
+    user_email = request.email
+
+    # 1. Tìm task MỚI NHẤT của Email này
+    task = db.query(VideoTask)\
+        .filter(VideoTask.email == user_email)\
+        .order_by(VideoTask.id.desc())\
+        .first()
+
+    if not task:
+        raise HTTPException(status_code=404, detail=f"No tasks found for email: {user_email}")
+
+    # 2. Validate trạng thái
+    if task.status not in [STATUS_TRANSCRIPTION_DONE, STATUS_COMPLETED]:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Your latest task (ID: {task.id}) is '{task.status}'. Please wait for transcription to finish."
+        )
+    
+    if task.status == STATUS_SUMMARIZING:
+        raise HTTPException(status_code=400, detail="Summarization is already in progress.")
+
+    try:
+        # 3. Trigger logic
+        task.status = STATUS_SUMMARIZING
+        db.commit()
+
+        payload = {
+            "id": task.id,
+            "message": "Trigger manual summary by user email"
+        }
+        redis_client.push_task(QUEUE_SUMMARIZE, payload)
+        
+        # Gán message ảo để trả về cho đẹp
+        task.message = f"Triggered summary for latest task ID: {task.id}"
+        return task 
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
