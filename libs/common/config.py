@@ -42,4 +42,4 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 ENV_FILE = os.path.join(ROOT_DIR, ".env.local")
 settings = Settings(_env_file=ENV_FILE)
 
-print(">>> DATABASE_URL FROM CONFIG =", settings.DATABASE_URL)
+# print(">>> DATABASE_URL FROM CONFIG =", settings.DATABASE_URL)
