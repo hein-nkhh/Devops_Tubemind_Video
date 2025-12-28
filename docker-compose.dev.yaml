@@ -83,8 +83,11 @@ services:
     networks:
       - tubemind-net
   api-gateway:
-    image: api-gateway
     container_name: tubemind-api-gateway
+    build:
+      context: .
+      dockerfile: services/api_gateway/Dockerfile
+    image: api-gateway
     ports:
       - "8000:8000"
     env_file:
@@ -101,6 +104,49 @@ services:
     volumes:
       - ./services/api_gateway/src:/app/src
       - ./libs:/app/libs
+  
+  transcriber:
+    container_name: tubemind-transcriber
+    build:
+      context: .
+      dockerfile: services/transcriber_worker/Dockerfile
+    image: tubemind-transcriber:cpu
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      CUDA_VISIBLE_DEVICES: ""
+      WHISPER_FORCE_CPU: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+    networks:
+      - tubemind-net
+    restart: unless-stopped
+
+  summarizer:
+    container_name: tubemind-summarizer
+    build:
+      context: .
+      dockerfile: services/summarizer_worker/Dockerfile
+    image: tubemind-summarizer
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - tubemind-net
+    restart: unless-stopped
 
 networks:
   tubemind-net:
