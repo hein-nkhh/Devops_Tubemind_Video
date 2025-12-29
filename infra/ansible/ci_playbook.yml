@@ -8,7 +8,7 @@
 
   tasks:
     # -----------------------------
-    # CREATE SWAP (2GB)
+    # 1. TẠO SWAP (2GB) - Để Jenkins không bị crash do thiếu RAM
     # -----------------------------
     - name: Create 2GB swapfile
       shell: |
@@ -20,7 +20,7 @@
         creates: "{{ swapfile }}"
 
     # -----------------------------
-    # INSTALL DOCKER
+    # 2. CÀI DOCKER
     # -----------------------------
     - name: Install Docker
       dnf:
@@ -40,7 +40,25 @@
         append: yes
 
     # -----------------------------
-    # DOCKER COMPOSE PLUGIN
+    # 3. CÀI AWS CLI v2 (QUAN TRỌNG: Để login ECR)
+    # -----------------------------
+    - name: Install unzip
+      dnf:
+        name: unzip
+        state: present
+    
+    - name: Download AWS CLI
+      unarchive:
+        src: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+        dest: "/tmp"
+        remote_src: yes
+    
+    - name: Install AWS CLI
+      shell: /tmp/aws/install --update
+      ignore_errors: yes
+
+    # -----------------------------
+    # 4. CÀI DOCKER COMPOSE PLUGIN
     # -----------------------------
     - name: Install Docker Compose plugin v2
       shell: |
@@ -52,7 +70,7 @@
         creates: /usr/local/lib/docker/cli-plugins/docker-compose
 
     # -----------------------------
-    # SONAR REQUIREMENT
+    # 5. CẤU HÌNH SYSCTL CHO SONARQUBE
     # -----------------------------
     - name: Set vm.max_map_count for SonarQube
       sysctl:
@@ -62,7 +80,7 @@
         reload: yes
 
     # -----------------------------
-    # WORKDIR
+    # 6. CHUẨN BỊ THƯ MỤC LÀM VIỆC
     # -----------------------------
     - name: Create CI working directory
       file:
@@ -78,7 +96,7 @@
         owner: ec2-user
 
     # -----------------------------
-    # START JENKINS & SONAR
+    # 7. CHẠY JENKINS & SONARQUBE
     # -----------------------------
     - name: Start Jenkins first
       shell: docker compose up -d jenkins
@@ -91,16 +109,13 @@
         chdir: "{{ workdir }}"
 
     # -----------------------------
-    # HELM INSTALL
+    # 8. CÀI CÁC CÔNG CỤ BỔ TRỢ (HELM, TRIVY)
     # -----------------------------
     - name: Install Helm CLI
       shell: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       args:
         creates: /usr/local/bin/helm
 
-    # -----------------------------
-    # TRIVY INSTALL
-    # -----------------------------
     - name: Install Trivy
       shell: |
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin

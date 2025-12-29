@@ -1,0 +1,1 @@
+output "public_ip" { value = aws_instance.target_server.public_ip }

@@ -1,0 +1,51 @@
+# Cấu hình chung cho ECR
+
+global:
+  ecrRegistry: "039968205787.dkr.ecr.us-east-1.amazonaws.com" # <--- Thay bằng output của Terraform
+  imageTag: "latest" # Jenkins sẽ update cái này
+
+# Cấu hình riêng cho từng service
+api:
+  image:
+    name: "tubemind/api-gateway"
+    pullPolicy: Always
+  service:
+    type: NodePort
+    port: 8000
+
+transcriber:
+  image:
+    name: "tubemind/transcriber"
+    pullPolicy: Always
+
+summarizer:
+  image:
+    name: "tubemind/summarizer"
+    pullPolicy: Always
+
+notifier:
+  image:
+    name: "tubemind/notifier"
+    pullPolicy: Always
+  env:
+    SMTP_HOST: "email-smtp.us-east-1.amazonaws.com" # <--- Check lại trong AWS SES Console
+    SMTP_PORT: 587
+    EMAIL_FROM: "huyhoang.190904@gmail.com"
+    
+# Cấu hình Tài nguyên bên ngoài (AWS)
+external:
+  db:
+    host: "tubemind-postgres-db.co7gewgmyvve.us-east-1.rds.amazonaws.com" # <--- PASTE RDS ENDPOINT TỪ TERRAFORM VÀO ĐÂY
+    port: 5432
+    name: "tubemind_db"
+    user: "tubemind_user" # Giống username bạn khai báo trong module database
+    # password: "super_secret_password_123" # Pass bạn đã đặt
+  s3:
+    bucketName: "tubemind-videos-20251229174127108100000001" # <--- PASTE S3 BUCKET NAME TỪ TERRAFORM VÀO ĐÂY
+    region: "us-east-1"
+
+# Cấu hình Redis (Chạy nội bộ trong K8s)
+redis:
+  host: "tubemind-redis" # Tên Service K8s của Redis
+  port: 6379
+

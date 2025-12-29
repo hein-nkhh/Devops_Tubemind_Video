@@ -8,8 +8,19 @@ from libs.common.database import init_db
 # from router import router # run local
 from .router import router # run in docker
 
+
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="TubeMind API Gateway")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
 
 @app.on_event("startup")
 def on_startup():

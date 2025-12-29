@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 1025
     EMAIL_FROM: str = "noreply@tubemind.local"
 
+    SMTP_USER: str = ""      # Mặc định rỗng để không lỗi nếu chạy local
+    SMTP_PASSWORD: str = ""  # Mặc định rỗng
+    
     GEMINI_API_KEY: str = ""
     WHISPER_MODEL_SIZE: str = "base"
     TEMP_DIR: str = "/tmp/tubemind"
@@ -36,10 +39,10 @@ class Settings(BaseSettings):
     )
     
 
-# settings = Settings()
+settings = Settings()
 
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-ENV_FILE = os.path.join(ROOT_DIR, ".env.local")
-settings = Settings(_env_file=ENV_FILE)
+# ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# ENV_FILE = os.path.join(ROOT_DIR, ".env.local")
+# settings = Settings(_env_file=ENV_FILE)
 
 # print(">>> DATABASE_URL FROM CONFIG =", settings.DATABASE_URL)

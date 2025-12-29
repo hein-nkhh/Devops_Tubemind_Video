@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    environment {
+        ECR_REGISTRY = '039968205787.dkr.ecr.us-east-1.amazonaws.com'
+        AWS_REGION   = 'us-east-1'
+    }
+
+    stages {
+        stage('Checkout Source') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Login ECR') {
+            steps {
+                sh """
+                aws ecr get-login-password --region ${AWS_REGION} \
+                | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                """
+            }
+        }
+
+        stage('Build & Push Docker') {
+            steps {
+                script {
+                    def services = [
+                        'api-gateway': 'services/api_gateway',
+                        'transcriber': 'services/transcriber_worker',
+                        'summarizer':  'services/summarizer_worker',
+                        'notifier':    'services/notifier_service'
+                    ]
+
+                    def tag = "v1.0.${BUILD_NUMBER}"
+
+                    services.each { name, path ->
+                        echo "Building ${name}"
+                        def image = "${ECR_REGISTRY}/tubemind/${name}:${tag}"
+                        docker.build(image, "./${path}").push()
+                    }
+                }
+            }
+        }
+
+        stage('Update Helm values.yaml') {
+            steps {
+                sh """
+                sed -i '/global:/,/imageTag:/ s/imageTag: ".*"/imageTag: "v1.0.${BUILD_NUMBER}"/' \
+                infra/k8s/helm/tubemind/values.yaml
+
+                git config user.email "jenkins@tubemind.com"
+                git config user.name "Jenkins Bot"
+
+                git add infra/k8s/helm/tubemind/values.yaml
+                git commit -m "chore(helm): bump image tag v1.0.${BUILD_NUMBER}"
+                git push origin main
+                """
+            }
+        }
+    }
+}

@@ -8,7 +8,7 @@
 
   tasks:
     # -----------------------------
-    # INSTALL K3S
+    # 1. CÀI K3S (Kubernetes Cluster)
     # -----------------------------
     - name: Install K3s
       shell: curl -sfL https://get.k3s.io | sh -s -- --write-kubeconfig-mode 644
@@ -23,13 +23,13 @@
       until: k3s_ready.rc == 0
 
     # -----------------------------
-    # ARGOCD
+    # 2. CÀI ARGOCD
     # -----------------------------
     - name: Create ArgoCD namespace
       shell: k3s kubectl create namespace argocd
       ignore_errors: true
 
-    - name: Install ArgoCD
+    - name: Install ArgoCD Manifest
       shell: k3s kubectl apply -n argocd --validate=false -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
     - name: Patch ArgoCD Service to NodePort
@@ -46,7 +46,7 @@
         }'
 
     # -----------------------------
-    # ARGOCD CLI
+    # 3. CÀI ARGOCD CLI (Option)
     # -----------------------------
     - name: Install ArgoCD CLI
       shell: |
@@ -57,7 +57,7 @@
         creates: /usr/local/bin/argocd
 
     # -----------------------------
-    # GET ADMIN PASSWORD
+    # 4. LẤY MẬT KHẨU ADMIN
     # -----------------------------
     - name: Get ArgoCD admin password
       shell: k3s kubectl -n argocd get secret argocd-initial-admin-secret \
@@ -67,3 +67,11 @@
     - name: Show ArgoCD password
       debug:
         msg: "ArgoCD admin password: {{ argocd_pass.stdout }}"
+
+    # -----------------------------
+    # 5. CÀI ECR CREDENTIAL HELPER (Quan trọng cho Option 2)
+    # -----------------------------
+    - name: Install ECR Helper
+      dnf:
+        name: amazon-ecr-credential-helper
+        state: present

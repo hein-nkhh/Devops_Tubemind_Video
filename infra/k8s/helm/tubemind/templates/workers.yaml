@@ -1,0 +1,206 @@
+# =====================================================
+# 1. Transcriber Worker
+# =====================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tubemind-transcriber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tubemind-transcriber
+  template:
+    metadata:
+      labels:
+        app: tubemind-transcriber
+    spec:
+      containers:
+        - name: transcriber
+          image: "{{ .Values.global.ecrRegistry }}/{{ .Values.transcriber.image.name }}:{{ .Values.global.imageTag }}"
+          imagePullPolicy: {{ .Values.transcriber.image.pullPolicy }}
+
+          env:
+            # -------- Database --------
+            - name: POSTGRES_HOST
+              value: {{ .Values.external.db.host | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.external.db.port | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.external.db.name | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.external.db.user | quote }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: POSTGRES_PASSWORD
+
+            # -------- Redis --------
+            - name: REDIS_HOST
+              value: {{ .Values.redis.host | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.redis.port | quote }}
+
+            # -------- Whisper / CPU --------
+            - name: CUDA_VISIBLE_DEVICES
+              value: ""
+            - name: WHISPER_FORCE_CPU
+              value: "1"
+            - name: OMP_NUM_THREADS
+              value: "1"
+            - name: MKL_NUM_THREADS
+              value: "1"
+
+            # -------- AWS S3 (Mapping vào biến MINIO) --------
+            - name: MINIO_ENDPOINT
+              value: "https://s3.amazonaws.com"
+            - name: MINIO_BUCKET_NAME
+              value: {{ .Values.external.s3.bucketName | quote }}
+            - name: MINIO_SECURE
+              value: "true"
+            - name: MINIO_ACCESS_KEY 
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+
+---
+# =====================================================
+# 2. Summarizer Worker
+# =====================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tubemind-summarizer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tubemind-summarizer
+  template:
+    metadata:
+      labels:
+        app: tubemind-summarizer
+    spec:
+      containers:
+        - name: summarizer
+          image: "{{ .Values.global.ecrRegistry }}/{{ .Values.summarizer.image.name }}:{{ .Values.global.imageTag }}"
+          imagePullPolicy: {{ .Values.summarizer.image.pullPolicy }}
+
+          env:
+            # -------- Database --------
+            - name: POSTGRES_HOST
+              value: {{ .Values.external.db.host | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.external.db.port | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.external.db.name | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.external.db.user | quote }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: POSTGRES_PASSWORD
+
+            # -------- Redis --------
+            - name: REDIS_HOST
+              value: {{ .Values.redis.host | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.redis.port | quote }}
+
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+
+---
+# =====================================================
+# 3. Notifier Worker
+# =====================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tubemind-notifier
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tubemind-notifier
+  template:
+    metadata:
+      labels:
+        app: tubemind-notifier
+    spec:
+      containers:
+        - name: notifier
+          image: "{{ .Values.global.ecrRegistry }}/{{ .Values.notifier.image.name }}:{{ .Values.global.imageTag }}"
+          imagePullPolicy: {{ .Values.notifier.image.pullPolicy }}
+
+          env:
+            # -------- Database --------
+            - name: POSTGRES_HOST
+              value: {{ .Values.external.db.host | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.external.db.port | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.external.db.name | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.external.db.user | quote }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: POSTGRES_PASSWORD
+
+            # -------- Redis --------
+            - name: REDIS_HOST
+              value: {{ .Values.redis.host | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.redis.port | quote }}
+
+            # -------- SMTP / Email (AWS SES) --------
+            # Các biến host/port lấy từ values.yaml
+            - name: SMTP_HOST
+              value: {{ .Values.notifier.env.SMTP_HOST | quote }}
+            - name: SMTP_PORT
+              value: {{ .Values.notifier.env.SMTP_PORT | quote }}
+            - name: EMAIL_FROM
+              value: {{ .Values.notifier.env.EMAIL_FROM | quote }}
+            
+            # User/Pass lấy từ Secret (Vì đây là thông tin nhạy cảm)
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: SMTP_USER
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: SMTP_PASSWORD
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

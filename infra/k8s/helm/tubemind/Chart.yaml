@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tubemind
+description: A Helm chart for TubeMind AI Video Project
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
