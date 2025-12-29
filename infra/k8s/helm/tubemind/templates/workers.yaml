@@ -75,11 +75,11 @@ spec:
 
           resources:
             requests:
-              cpu: "500m"
+              cpu: "200m"
               memory: "512Mi"
             limits:
-              cpu: "2000m"
-              memory: "2Gi"
+              cpu: "1000m"
+              memory: "1.5Gi"
 
 ---
 # =====================================================
@@ -131,11 +131,11 @@ spec:
 
           resources:
             requests:
-              cpu: "200m"
-              memory: "256Mi"
+              cpu: "50m"
+              memory: "128Mi"
             limits:
-              cpu: "1000m"
-              memory: "1Gi"
+              cpu: "500m"
+              memory: "512Mi"
 
 ---
 # =====================================================
@@ -157,7 +157,7 @@ spec:
     spec:
       imagePullSecrets:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
-        
+
       containers:
         - name: notifier
           image: "{{ .Values.global.ecrRegistry }}/{{ .Values.notifier.image.name }}:{{ .Values.global.imageTag }}"
@@ -208,8 +208,8 @@ spec:
 
           resources:
             requests:
-              cpu: "100m"
-              memory: "128Mi"
+              cpu: "20m"
+              memory: "64Mi"
             limits:
-              cpu: "500m"
-              memory: "512Mi"
+              cpu: "200m"
+              memory: "256Mi"
