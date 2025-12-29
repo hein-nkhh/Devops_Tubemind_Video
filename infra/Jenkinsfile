@@ -2,60 +2,100 @@ pipeline {
     agent any
 
     environment {
+        // Cấu hình thông tin AWS & ECR
+        AWS_REGION = 'us-east-1'
         ECR_REGISTRY = '039968205787.dkr.ecr.us-east-1.amazonaws.com'
-        AWS_REGION   = 'us-east-1'
+        
+        // Tên các Image
+        IMAGE_TRANSCRIBER = 'tubemind/transcriber'
+        IMAGE_SUMMARIZER = 'tubemind/summarizer'
+        IMAGE_NOTIFIER = 'tubemind/notifier'
+        IMAGE_API = 'tubemind/api-gateway'
+        
+        // Tag phiên bản (Dùng số Build của Jenkins làm Tag)
+        IMAGE_TAG = "v1.0.${BUILD_NUMBER}"
     }
 
     stages {
         stage('Checkout Source') {
             steps {
+                // Lấy code từ Git về
                 checkout scm
             }
         }
 
-        stage('Login ECR') {
-            steps {
-                sh """
-                aws ecr get-login-password --region ${AWS_REGION} \
-                | docker login --username AWS --password-stdin ${ECR_REGISTRY}
-                """
-            }
-        }
-
         stage('Build & Push Docker') {
+            // [QUAN TRỌNG] Đoạn này sửa lỗi "docker/aws not found"
+            // Chúng ta dùng image 'docker:cli' có sẵn docker để chạy stage này
+            agent {
+                docker {
+                    image 'docker:cli' 
+                    // Map socket để container con gọi được Docker của máy chủ
+                    args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
+                }
+            }
             steps {
                 script {
-                    def services = [
-                        'api-gateway': 'services/api_gateway',
-                        'transcriber': 'services/transcriber_worker',
-                        'summarizer':  'services/summarizer_worker',
-                        'notifier':    'services/notifier_service'
-                    ]
+                    echo "--- 🛠️ Installing AWS CLI & Git ---"
+                    // Cài nhanh AWS CLI và Git vào trong agent tạm thời này
+                    sh 'apk add --no-cache aws-cli git'
 
-                    def tag = "v1.0.${BUILD_NUMBER}"
+                    echo "--- 🔑 Login AWS ECR ---"
+                    // Lệnh này giờ sẽ chạy OK vì đã có aws-cli
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
 
-                    services.each { name, path ->
-                        echo "Building ${name}"
-                        def image = "${ECR_REGISTRY}/tubemind/${name}:${tag}"
-                        docker.build(image, "./${path}").push()
-                    }
+                    echo "--- 🐳 Build & Push Images ---"
+                    
+                    // 1. Transcriber
+                    sh "docker build -t ${ECR_REGISTRY}/${IMAGE_TRANSCRIBER}:${IMAGE_TAG} -f services/transcriber_worker/Dockerfile ."
+                    sh "docker push ${ECR_REGISTRY}/${IMAGE_TRANSCRIBER}:${IMAGE_TAG}"
+
+                    // 2. Summarizer
+                    sh "docker build -t ${ECR_REGISTRY}/${IMAGE_SUMMARIZER}:${IMAGE_TAG} -f services/summarizer_worker/Dockerfile ."
+                    sh "docker push ${ECR_REGISTRY}/${IMAGE_SUMMARIZER}:${IMAGE_TAG}"
+
+                    // 3. Notifier
+                    sh "docker build -t ${ECR_REGISTRY}/${IMAGE_NOTIFIER}:${IMAGE_TAG} -f services/notifier_service/Dockerfile ."
+                    sh "docker push ${ECR_REGISTRY}/${IMAGE_NOTIFIER}:${IMAGE_TAG}"
+
+                    // 4. API Gateway (Nếu có)
+                    // sh "docker build -t ${ECR_REGISTRY}/${IMAGE_API}:${IMAGE_TAG} -f services/api_gateway/Dockerfile ."
+                    // sh "docker push ${ECR_REGISTRY}/${IMAGE_API}:${IMAGE_TAG}"
                 }
             }
         }
 
         stage('Update Helm values.yaml') {
+            // Stage này cần Git để commit code
+            agent {
+                docker {
+                    image 'bitnami/git:latest'
+                    args '-u root'
+                }
+            }
             steps {
-                sh """
-                sed -i '/global:/,/imageTag:/ s/imageTag: ".*"/imageTag: "v1.0.${BUILD_NUMBER}"/' \
-                infra/k8s/helm/tubemind/values.yaml
+                script {
+                    echo "--- 📝 Updating Helm Chart Version ---"
+                    
+                    // Cấu hình Git tạm thời (Để commit được)
+                    sh 'git config --global user.email "jenkins@tubemind.local"'
+                    sh 'git config --global user.name "Jenkins Bot"'
 
-                git config user.email "jenkins@tubemind.com"
-                git config user.name "Jenkins Bot"
+                    // Dùng sed để tìm dòng 'imageTag:' và thay bằng tag mới
+                    // Lưu ý: Đường dẫn file values.yaml phải đúng
+                    sh """
+                        sed -i 's/imageTag: .*/imageTag: "${IMAGE_TAG}"/g' k8s/helm/tubemind/values.yaml
+                    """
 
-                git add infra/k8s/helm/tubemind/values.yaml
-                git commit -m "chore(helm): bump image tag v1.0.${BUILD_NUMBER}"
-                git push origin main
-                """
+                    echo "--- 💾 Committing changes ---"
+                    // Commit và Push lại lên Git để ArgoCD nhận thấy thay đổi
+                    withCredentials([usernamePassword(credentialsId: 'github-login', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                        sh "git add k8s/helm/tubemind/values.yaml"
+                        sh "git commit -m 'Jenkins update image tag to ${IMAGE_TAG}'"
+                        // Push với token
+                        sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/hein-nkhh/Devops_Tubemind_Video.git HEAD:main"
+                    }
+                }
             }
         }
     }
