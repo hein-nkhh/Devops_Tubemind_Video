@@ -66,33 +66,40 @@ pipeline {
         }
 
         stage('Update Helm values.yaml') {
-            // Stage này cần Git để commit code
             agent {
                 docker {
-                    image 'bitnami/git:latest'
-                    args '-u root'
+                    // 1. Đổi sang image alpine/git (Rất nhẹ và tương thích tốt)
+                    image 'alpine/git' 
+                    // 2. Quan trọng: Overwrite entrypoint để Jenkins điều khiển được container
+                    args '--entrypoint="" -u root'
                 }
             }
             steps {
                 script {
                     echo "--- 📝 Updating Helm Chart Version ---"
                     
-                    // Cấu hình Git tạm thời (Để commit được)
+                    // Debug: Liệt kê file để chắc chắn file tồn tại (Nếu lỗi sẽ thấy ngay)
+                    sh 'ls -la k8s/helm/tubemind/'
+
+                    // Cấu hình Git
                     sh 'git config --global user.email "jenkins@tubemind.local"'
                     sh 'git config --global user.name "Jenkins Bot"'
+                    // Sửa lỗi "dubious ownership" do chạy quyền root
+                    sh 'git config --global --add safe.directory /var/jenkins_home/workspace/tubemind-deploy'
+                    sh 'git config --global --add safe.directory /var/jenkins_home/workspace/tubemind-deploy@2'
 
-                    // Dùng sed để tìm dòng 'imageTag:' và thay bằng tag mới
-                    // Lưu ý: Đường dẫn file values.yaml phải đúng
+                    // Chạy lệnh sed thay thế
                     sh """
                         sed -i 's/imageTag: .*/imageTag: "${IMAGE_TAG}"/g' k8s/helm/tubemind/values.yaml
                     """
 
+                    // Kiểm tra xem file đã đổi chưa (Debug)
+                    sh 'grep "imageTag" k8s/helm/tubemind/values.yaml'
+
                     echo "--- 💾 Committing changes ---"
-                    // Commit và Push lại lên Git để ArgoCD nhận thấy thay đổi
                     withCredentials([usernamePassword(credentialsId: 'github-login', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                         sh "git add k8s/helm/tubemind/values.yaml"
                         sh "git commit -m 'Jenkins update image tag to ${IMAGE_TAG}'"
-                        // Push với token
                         sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/hein-nkhh/Devops_Tubemind_Video.git HEAD:main"
                     }
                 }
