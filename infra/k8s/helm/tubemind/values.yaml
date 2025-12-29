@@ -2,7 +2,7 @@
 
 global:
   ecrRegistry: "039968205787.dkr.ecr.us-east-1.amazonaws.com" # <--- Thay bằng output của Terraform
-  imageTag: "latest" # Jenkins sẽ update cái này
+  imageTag: "v1.0.9"
 
 # Cấu hình riêng cho từng service
 api:
