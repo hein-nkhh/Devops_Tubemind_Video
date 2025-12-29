@@ -76,6 +76,7 @@ pipeline {
             }
             steps {
                 script {
+                    checkout scm
                     echo "--- 📝 Updating Helm Chart Version ---"
                     
                     // Debug: Liệt kê file để chắc chắn file tồn tại (Nếu lỗi sẽ thấy ngay)
