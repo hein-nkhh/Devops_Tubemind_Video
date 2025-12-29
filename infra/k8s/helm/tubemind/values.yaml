@@ -4,6 +4,9 @@ global:
   ecrRegistry: "039968205787.dkr.ecr.us-east-1.amazonaws.com" # <--- Thay bằng output của Terraform
   imageTag: "latest" # Jenkins sẽ update cái này
 
+imagePullSecrets:
+  - name: regcred
+  
 # Cấu hình riêng cho từng service
 api:
   image:
