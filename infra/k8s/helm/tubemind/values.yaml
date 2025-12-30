@@ -52,7 +52,7 @@ prometheus:
     prometheus:
       prometheusSpec:
         retention: 1d
-        storageSpec: {} # Chạy tạm trên RAM/Disk ko bền vững để tiết kiệm
+        storageSpec: {} 
         resources:
           limits:
             memory: "800Mi"
@@ -63,13 +63,19 @@ prometheus:
       service:
         type: NodePort
         nodePort: 32000
+      # Sửa lỗi: Đảm bảo sidecar tự động quét DataSources
+      sidecar:
+        datasources:
+          enabled: true
+          defaultDatasourceEnabled: true # Ưu tiên Prometheus làm mặc định
 
 loki:
   enabled: true
   loki-stack:
     loki:
+      isDefault: false # Quan trọng: Tắt mặc định của Loki để tránh lỗi 500 trong log
       persistence:
-        enabled: false # Không dùng EBS để tránh tốn phí AWS
+        enabled: false 
       resources:
         limits:
           memory: "400Mi"
@@ -77,3 +83,6 @@ loki:
       resources:
         limits:
           memory: "200Mi"
+      # Cấu hình Promtail để nó biết gửi log về Service nào
+      config:
+        lokiAddress: http://{{ .Release.Name }}-loki:3100/loki/api/v1/push
