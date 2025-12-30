@@ -57,7 +57,7 @@ spec:
 
             # -------- AWS S3 (Mapping vào biến MINIO) --------
             - name: MINIO_ENDPOINT
-              value: "https://s3.amazonaws.com"
+              value: "s3.amazonaws.com"
             - name: MINIO_BUCKET_NAME
               value: {{ .Values.external.s3.bucketName | quote }}
             - name: MINIO_SECURE
@@ -139,7 +139,7 @@ spec:
 
             # Minio (S3)
             - name: MINIO_ENDPOINT
-              value: "https://s3.amazonaws.com"
+              value: "s3.amazonaws.com"
             - name: MINIO_BUCKET_NAME
               value: {{ .Values.external.s3.bucketName | quote }}
             - name: MINIO_SECURE
@@ -219,8 +219,25 @@ spec:
             - name: REDIS_PORT
               value: {{ .Values.redis.port | quote }}
 
+            # -------- [BỔ SUNG] MINIO (BẮT BUỘC PHẢI CÓ) --------
+            - name: MINIO_ENDPOINT
+              value: "s3.amazonaws.com"
+            - name: MINIO_BUCKET_NAME
+              value: {{ .Values.external.s3.bucketName | quote }}
+            - name: MINIO_SECURE
+              value: "true"
+            - name: MINIO_ACCESS_KEY 
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+
             # -------- SMTP / Email (AWS SES) --------
-            # Các biến host/port lấy từ values.yaml
             - name: SMTP_HOST
               value: {{ .Values.notifier.env.SMTP_HOST | quote }}
             - name: SMTP_PORT
@@ -228,7 +245,6 @@ spec:
             - name: EMAIL_FROM
               value: {{ .Values.notifier.env.EMAIL_FROM | quote }}
             
-            # User/Pass lấy từ Secret (Vì đây là thông tin nhạy cảm)
             - name: SMTP_USER
               valueFrom:
                 secretKeyRef:
