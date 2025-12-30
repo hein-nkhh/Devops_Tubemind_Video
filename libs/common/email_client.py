@@ -27,8 +27,9 @@ logger = get_logger("email-client")
 
 def send_email(to_email: str, subject: str, body: str):
     msg = MIMEMultipart()
+    # Đảm bảo EMAIL_FROM lấy đúng từ SMTP_USER nếu EMAIL_FROM bị trống
     sender = settings.EMAIL_FROM or settings.SMTP_USER
-    msg['From'] = settings.EMAIL_FROM
+    msg['From'] = sender
     msg['To'] = to_email
     msg['Subject'] = subject
     msg.attach(MIMEText(body, 'plain'))
