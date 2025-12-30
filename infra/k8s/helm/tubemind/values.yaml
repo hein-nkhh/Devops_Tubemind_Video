@@ -44,3 +44,36 @@ external:
 redis:
   host: "tubemind-redis"
   port: 6379
+
+# Cấu hình Monitoring tập trung
+prometheus:
+  enabled: true
+  kube-prometheus-stack:
+    prometheus:
+      prometheusSpec:
+        retention: 1d
+        storageSpec: {} # Chạy tạm trên RAM/Disk ko bền vững để tiết kiệm
+        resources:
+          limits:
+            memory: "800Mi"
+          requests:
+            memory: "400Mi"
+    grafana:
+      adminPassword: "admin"
+      service:
+        type: NodePort
+        nodePort: 32000
+
+loki:
+  enabled: true
+  loki-stack:
+    loki:
+      persistence:
+        enabled: false # Không dùng EBS để tránh tốn phí AWS
+      resources:
+        limits:
+          memory: "400Mi"
+    promtail:
+      resources:
+        limits:
+          memory: "200Mi"
