@@ -245,9 +245,15 @@ spec:
 
             # -------- SMTP / Email (AWS SES) --------
             - name: SMTP_HOST
-              value: {{ .Values.notifier.env.SMTP_HOST | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: SMTP_HOST
             - name: SMTP_PORT
-              value: {{ .Values.notifier.env.SMTP_PORT | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: SMTP_PORT
             - name: EMAIL_FROM
               value: {{ .Values.notifier.env.EMAIL_FROM | quote }}
             
