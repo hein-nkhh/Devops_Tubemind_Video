@@ -52,13 +52,21 @@ class TranscriberEngine:
         # Lưu ý: output template để extension tự động, nhưng yt-dlp sẽ trả về file cụ thể
         output_template = os.path.join(TMP_DIR, f"{file_id}.%(ext)s")
 
+        cookie_path = os.getenv("YOUTUBE_COOKIE_PATH")
+        
         ydl_opts = {
             "format": "bestaudio/best", # Lấy audio tốt nhất cho nhẹ
             "outtmpl": output_template,
             "quiet": True,
             "no_warnings": True,
-            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
+        
+        if cookie_path and os.path.exists(cookie_path):
+            logger.info(f"Sử dụng YouTube Cookies tại: {cookie_path}")
+            ydl_opts["cookiefile"] = cookie_path
+        else:
+            logger.warning("Không tìm thấy file cookies, có thể bị chặn bởi YouTube")
+            
         try:
             logger.info(f"Downloading audio from Youtube: {url}")
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:

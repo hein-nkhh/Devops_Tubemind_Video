@@ -87,6 +87,9 @@ spec:
             - name: EMAIL_FROM
               value: {{ .Values.notifier.env.EMAIL_FROM | quote }}
 
+            - name: YOUTUBE_COOKIE_PATH
+              value: "/app/secrets/cookies.txt"
+
           resources:
             requests:
               cpu: "400m"
@@ -95,6 +98,14 @@ spec:
               cpu: "2000m"
               memory: "2Gi"
 
+          volumeMounts:
+            - name: cookie-storage
+              mountPath: "/app/secrets"
+              readOnly: true
+      volumes:
+        - name: cookie-storage
+          secret:
+            secretName: youtube-cookies
 ---
 # =====================================================
 # 2. Summarizer Worker
