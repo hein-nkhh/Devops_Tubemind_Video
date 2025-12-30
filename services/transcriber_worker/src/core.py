@@ -57,14 +57,17 @@ class TranscriberEngine:
             "outtmpl": output_template,
             "quiet": True,
             "no_warnings": True,
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
-
-        logger.info(f"Downloading audio from Youtube: {url}")
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            downloaded_path = ydl.prepare_filename(info)
-
-        return downloaded_path
+        try:
+            logger.info(f"Downloading audio from Youtube: {url}")
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+                downloaded_path = ydl.prepare_filename(info)
+            return downloaded_path
+        except Exception as e:
+            logger.error(f"Error downloading from Youtube: {e}")
+            raise e
 
     # --- NEW FUNCTION ---
     def upload_file_to_minio(self, local_path: str, folder_name: str) -> str:
