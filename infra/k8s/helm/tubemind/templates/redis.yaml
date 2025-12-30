@@ -1,3 +1,16 @@
+# 1. PHẦN SERVICE (Cái này đang thiếu dẫn đến lỗi API không tìm thấy Redis)
+apiVersion: v1
+kind: Service
+metadata:
+  name: tubemind-redis
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: tubemind-redis
+
+# 2. PHẦN DEPLOYMENT (Giữ nguyên logic của bạn nhưng sửa Label cho chuẩn)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,11 +19,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: redis
+      app: tubemind-redis
   template:
     metadata:
       labels:
-        app: redis
+        app: tubemind-redis
     spec:
       containers:
         - name: redis
