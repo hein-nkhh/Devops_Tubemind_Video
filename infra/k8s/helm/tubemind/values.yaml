@@ -25,6 +25,12 @@ summarizer:
   image:
     name: "tubemind/summarizer"
     pullPolicy: Always
+  env:
+    GEMINI_API_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: tubemind-secrets
+          key: GEMINI_API_KEY
 
 notifier:
   image:
