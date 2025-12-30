@@ -27,26 +27,26 @@ logger = get_logger("email-client")
 
 def send_email(to_email: str, subject: str, body: str):
     msg = MIMEMultipart()
+    sender = settings.EMAIL_FROM or settings.SMTP_USER
     msg['From'] = settings.EMAIL_FROM
     msg['To'] = to_email
     msg['Subject'] = subject
     msg.attach(MIMEText(body, 'plain'))
 
     try:
-        # MailHog dùng port 1025, AWS SES dùng port 587
-        server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT)
-        
-        # [QUAN TRỌNG] Bật chế độ mã hoá TLS nếu không phải localhost
-        if settings.SMTP_USER and settings.SMTP_PASSWORD:
-            server.starttls() 
-            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-        
-        server.sendmail(settings.EMAIL_FROM, to_email, msg.as_string())
-        server.quit()
-        
+        # Sử dụng 'with' để tự động đóng kết nối
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+            server.ehlo() # Định danh với server
+            server.starttls() # Bảo mật kết nối
+            server.ehlo() 
+            
+            if settings.SMTP_USER and settings.SMTP_PASSWORD:
+                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+            
+            server.send_message(msg) # Dùng send_message thay vì sendmail sẽ chuẩn hơn với MIMEMultipart
+            
         logger.info(f"Email sent successfully to {to_email}")
         return True
-        
     except Exception as e:
         logger.error(f"Failed to send email: {e}")
         return False
