@@ -1,6 +1,7 @@
 global:
-  ecrRegistry: "039968205787.dkr.ecr.us-east-1.amazonaws.com"
-  imageTag: "v1.0.51"
+
+  ecrRegistry: "039968205787.dkr.ecr.us-east-1.amazonaws.com" # <--- Thay bằng output của Terraform
+  imageTag: "v1.0.52"
 
 imagePullSecrets:
   - name: ecr-secret
