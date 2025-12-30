@@ -14,7 +14,7 @@ spec:
     spec:
       imagePullSecrets:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
-        
+
       containers:
         - name: api
           image: "{{ .Values.global.ecrRegistry }}/{{ .Values.api.image.name }}:{{ .Values.global.imageTag }}"
@@ -27,38 +27,52 @@ spec:
           # Environment Variables
           # ======================
           env:
-            # -------- Database --------
+            # --- DATABASE ---
             - name: POSTGRES_HOST
               value: {{ .Values.external.db.host | quote }}
-
             - name: POSTGRES_PORT
               value: {{ .Values.external.db.port | quote }}
-
             - name: POSTGRES_DB
               value: {{ .Values.external.db.name | quote }}
-
             - name: POSTGRES_USER
               value: {{ .Values.external.db.user | quote }}
-
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: tubemind-secrets
                   key: POSTGRES_PASSWORD
-
-            # -------- Redis --------
+            
+            # --- REDIS ---
             - name: REDIS_HOST
               value: {{ .Values.redis.host | quote }}
-
             - name: REDIS_PORT
               value: {{ .Values.redis.port | quote }}
 
-            # -------- S3 --------
-            - name: S3_BUCKET_NAME
+            # --- MINIO (Bắt buộc phải có để Pydantic không lỗi) ---
+            - name: MINIO_ENDPOINT
+              value: "https://s3.amazonaws.com"
+            - name: MINIO_BUCKET_NAME
               value: {{ .Values.external.s3.bucketName | quote }}
+            - name: MINIO_SECURE
+              value: "true"
+            - name: MINIO_ACCESS_KEY 
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets
+                  key: AWS_SECRET_ACCESS_KEY
 
-            - name: AWS_REGION
-              value: {{ .Values.external.s3.region | quote }}
+            # --- SMTP (Bắt buộc phải có để Pydantic không lỗi) ---
+            - name: SMTP_HOST
+              value: {{ .Values.notifier.env.SMTP_HOST | quote }}
+            - name: SMTP_PORT
+              value: {{ .Values.notifier.env.SMTP_PORT | quote }}
+            - name: EMAIL_FROM
+              value: {{ .Values.notifier.env.EMAIL_FROM | quote }}
 
           # ======================
           # Health Checks
