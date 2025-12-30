@@ -1,7 +1,7 @@
 global:
 
   ecrRegistry: "039968205787.dkr.ecr.us-east-1.amazonaws.com" # <--- Thay bằng output của Terraform
-  imageTag: "v1.0.63"
+  imageTag: "v1.0.65"
 
 imagePullSecrets:
   - name: regcred
