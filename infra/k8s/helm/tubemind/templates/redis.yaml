@@ -10,6 +10,8 @@ spec:
   selector:
     app: tubemind-redis
 
+---
+
 # 2. PHẦN DEPLOYMENT (Giữ nguyên logic của bạn nhưng sửa Label cho chuẩn)
 apiVersion: apps/v1
 kind: Deployment
