@@ -59,8 +59,8 @@ pipeline {
                     sh "docker push ${ECR_REGISTRY}/${IMAGE_NOTIFIER}:${IMAGE_TAG}"
 
                     // 4. API Gateway (Nếu có)
-                    // sh "docker build -t ${ECR_REGISTRY}/${IMAGE_API}:${IMAGE_TAG} -f services/api_gateway/Dockerfile ."
-                    // sh "docker push ${ECR_REGISTRY}/${IMAGE_API}:${IMAGE_TAG}"
+                    sh "docker build -t ${ECR_REGISTRY}/${IMAGE_API}:${IMAGE_TAG} -f services/api_gateway/Dockerfile ."
+                    sh "docker push ${ECR_REGISTRY}/${IMAGE_API}:${IMAGE_TAG}"
                 }
             }
         }
