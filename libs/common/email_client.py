@@ -37,9 +37,9 @@ def send_email(to_email: str, subject: str, body: str):
         server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT)
         
         # [QUAN TRỌNG] Bật chế độ mã hoá TLS nếu không phải localhost
-        if settings.SMTP_User and settings.SMTP_PASSWORD:
+        if settings.SMTP_USER and settings.SMTP_PASSWORD:
             server.starttls() 
-            server.login(settings.SMTP_User, settings.SMTP_PASSWORD)
+            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
         
         server.sendmail(settings.EMAIL_FROM, to_email, msg.as_string())
         server.quit()
