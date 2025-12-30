@@ -59,6 +59,7 @@ class TranscriberEngine:
             "outtmpl": output_template,
             "quiet": True,
             "no_warnings": True,
+            "noprogress": True,
         }
         
         if cookie_path and os.path.exists(cookie_path):
@@ -69,7 +70,10 @@ class TranscriberEngine:
             
         try:
             logger.info(f"Downloading audio from Youtube: {url}")
+            
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.cookiejar.write = lambda *args, **kwargs: None
+                
                 info = ydl.extract_info(url, download=True)
                 downloaded_path = ydl.prepare_filename(info)
             return downloaded_path
