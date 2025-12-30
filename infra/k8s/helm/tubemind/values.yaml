@@ -4,7 +4,7 @@ global:
   imageTag: "v1.0.52"
 
 imagePullSecrets:
-  - name: ecr-secret
+  - name: regcred
 
 api:
   image:
