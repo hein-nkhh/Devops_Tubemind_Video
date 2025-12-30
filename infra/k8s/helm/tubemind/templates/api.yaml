@@ -50,7 +50,7 @@ spec:
 
             # --- MINIO (Bắt buộc phải có để Pydantic không lỗi) ---
             - name: MINIO_ENDPOINT
-              value: "https://s3.amazonaws.com"
+              value: "s3.amazonaws.com"
             - name: MINIO_BUCKET_NAME
               value: {{ .Values.external.s3.bucketName | quote }}
             - name: MINIO_SECURE
