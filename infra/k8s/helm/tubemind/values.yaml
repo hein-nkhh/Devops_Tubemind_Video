@@ -29,8 +29,16 @@ notifier:
     name: "tubemind/notifier"
     pullPolicy: Always
   env:
-    SMTP_HOST: "email-smtp.us-east-1.amazonaws.com"
-    SMTP_PORT: 587
+    SMTP_HOST:
+    valueFrom:
+      secretKeyRef:
+        name: tubemind-secrets
+        key: SMTP_HOST
+    SMTP_PORT:
+      valueFrom:
+        secretKeyRef:
+          name: tubemind-secrets
+          key: SMTP_PORT
     EMAIL_FROM: "huyhoang.190904@gmail.com"
 
 external:
