@@ -27,24 +27,26 @@ logger = get_logger("email-client")
 
 def send_email(to_email: str, subject: str, body: str):
     msg = MIMEMultipart()
-    # Đảm bảo EMAIL_FROM lấy đúng từ SMTP_USER nếu EMAIL_FROM bị trống
-    sender = settings.EMAIL_FROM or settings.SMTP_USER
-    msg['From'] = sender
+    
+    # SET CỨNG EMAIL_FROM TẠI ĐÂY
+    fixed_email = "huyhoang.190904@gmail.com" 
+    
+    msg['From'] = fixed_email
     msg['To'] = to_email
     msg['Subject'] = subject
     msg.attach(MIMEText(body, 'plain'))
 
     try:
-        # Sử dụng 'with' để tự động đóng kết nối
         with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-            server.ehlo() # Định danh với server
-            server.starttls() # Bảo mật kết nối
+            server.ehlo()
+            server.starttls()
             server.ehlo() 
             
+            # Sử dụng thông tin đăng nhập từ settings nhưng đăng nhập bằng đúng email đã set cứng
             if settings.SMTP_USER and settings.SMTP_PASSWORD:
-                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                server.login(fixed_email, settings.SMTP_PASSWORD)
             
-            server.send_message(msg) # Dùng send_message thay vì sendmail sẽ chuẩn hơn với MIMEMultipart
+            server.send_message(msg)
             
         logger.info(f"Email sent successfully to {to_email}")
         return True
