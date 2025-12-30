@@ -48,38 +48,46 @@ class TranscriberEngine:
 
     def download_from_youtube(self, url: str) -> str:
         import uuid
+        import yt_dlp
+        import shutil  # Thêm thư mục này để copy file
+        
         file_id = str(uuid.uuid4())
-        # Lưu ý: output template để extension tự động, nhưng yt-dlp sẽ trả về file cụ thể
         output_template = os.path.join(TMP_DIR, f"{file_id}.%(ext)s")
 
-        cookie_path = os.getenv("YOUTUBE_COOKIE_PATH")
+        # 1. Đường dẫn gốc từ Secret (Chỉ đọc)
+        secret_cookie_path = os.getenv("YOUTUBE_COOKIE_PATH")
         
+        # 2. Đường dẫn tạm thời (Có quyền ghi)
+        writable_cookie_path = os.path.join(TMP_DIR, f"cookies_{file_id}.txt")
+
         ydl_opts = {
-            "format": "bestaudio/best", # Lấy audio tốt nhất cho nhẹ
+            "format": "bestaudio/best",
             "outtmpl": output_template,
             "quiet": True,
             "no_warnings": True,
-            "noprogress": True,
         }
-        
-        if cookie_path and os.path.exists(cookie_path):
-            logger.info(f"Sử dụng YouTube Cookies tại: {cookie_path}")
-            ydl_opts["cookiefile"] = cookie_path
-        else:
-            logger.warning("Không tìm thấy file cookies, có thể bị chặn bởi YouTube")
-            
+
+        # 3. Copy file cookies từ Secret sang thư mục tạm trước khi dùng
+        if secret_cookie_path and os.path.exists(secret_cookie_path):
+            try:
+                shutil.copy2(secret_cookie_path, writable_cookie_path)
+                logger.info(f"Đã copy cookies sang file tạm có quyền ghi: {writable_cookie_path}")
+                ydl_opts["cookiefile"] = writable_cookie_path
+            except Exception as e:
+                logger.error(f"Không thể copy file cookies: {e}")
+
         try:
-            logger.info(f"Downloading audio from Youtube: {url}")
-            
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.cookiejar.write = lambda *args, **kwargs: None
-                
                 info = ydl.extract_info(url, download=True)
                 downloaded_path = ydl.prepare_filename(info)
             return downloaded_path
         except Exception as e:
             logger.error(f"Error downloading from Youtube: {e}")
             raise e
+        finally:
+            # 4. Xóa file cookies tạm sau khi xong để bảo mật và sạch bộ nhớ
+            if os.path.exists(writable_cookie_path):
+                os.remove(writable_cookie_path)
 
     # --- NEW FUNCTION ---
     def upload_file_to_minio(self, local_path: str, folder_name: str) -> str:
