@@ -1,60 +1,47 @@
-# Cấu hình chung cho ECR
-
 global:
-  ecrRegistry: "039968205787.dkr.ecr.us-east-1.amazonaws.com" # <--- Thay bằng output của Terraform
+  ecrRegistry: "039968205787.dkr.ecr.us-east-1.amazonaws.com"
   imageTag: "v1.0.51"
 
 imagePullSecrets:
-  - name: regcred
-  
-# Cấu hình riêng cho từng service
+  - name: ecr-secret
+
 api:
   image:
     name: "tubemind/api-gateway"
     pullPolicy: Always
-  service:
-    type: NodePort
-    port: 8000
+  env:
+    MINIO_ENDPOINT: "s3.amazonaws.com"
 
 transcriber:
   image:
     name: "tubemind/transcriber"
     pullPolicy: Always
+  # Worker này ko dùng env từ values nhiều vì worker.yaml đã fix cứng/lấy từ global
 
 summarizer:
   image:
     name: "tubemind/summarizer"
     pullPolicy: Always
-  env:
-    GEMINI_API_KEY:
-      valueFrom:
-        secretKeyRef:
-          name: tubemind-secrets
-          key: GEMINI_API_KEY
 
 notifier:
   image:
     name: "tubemind/notifier"
     pullPolicy: Always
   env:
-    SMTP_HOST: "email-smtp.us-east-1.amazonaws.com" # <--- Check lại trong AWS SES Console
+    SMTP_HOST: "email-smtp.us-east-1.amazonaws.com"
     SMTP_PORT: 587
     EMAIL_FROM: "huyhoang.190904@gmail.com"
-    
-# Cấu hình Tài nguyên bên ngoài (AWS)
+
 external:
   db:
-    host: "tubemind-postgres-db.co7gewgmyvve.us-east-1.rds.amazonaws.com" # <--- PASTE RDS ENDPOINT TỪ TERRAFORM VÀO ĐÂY
+    host: "tubemind-postgres-db.co7gewgmyvve.us-east-1.rds.amazonaws.com"
     port: 5432
     name: "tubemind_db"
-    user: "tubemind_user" # Giống username bạn khai báo trong module database
-    # password: "super_secret_password_123" # Pass bạn đã đặt
+    user: "tubemind_user"
   s3:
-    bucketName: "tubemind-videos-20251229174127108100000001" # <--- PASTE S3 BUCKET NAME TỪ TERRAFORM VÀO ĐÂY
+    bucketName: "tubemind-videos-20251229174127108100000001"
     region: "us-east-1"
 
-# Cấu hình Redis (Chạy nội bộ trong K8s)
 redis:
-  host: "tubemind-redis" # Tên Service K8s của Redis
+  host: "tubemind-redis"
   port: 6379
-

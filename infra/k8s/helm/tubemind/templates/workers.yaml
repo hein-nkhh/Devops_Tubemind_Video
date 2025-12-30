@@ -57,7 +57,7 @@ spec:
 
             # -------- AWS S3 (Mapping vào biến MINIO) --------
             - name: MINIO_ENDPOINT
-              value: "s3.amazonaws.com"
+              value: {{ .Values.api.env.MINIO_ENDPOINT | quote }}
             - name: MINIO_BUCKET_NAME
               value: {{ .Values.external.s3.bucketName | quote }}
             - name: MINIO_SECURE
@@ -139,7 +139,7 @@ spec:
 
             # Minio (S3)
             - name: MINIO_ENDPOINT
-              value: "s3.amazonaws.com"
+              value: {{ .Values.api.env.MINIO_ENDPOINT | quote }}
             - name: MINIO_BUCKET_NAME
               value: {{ .Values.external.s3.bucketName | quote }}
             - name: MINIO_SECURE
@@ -163,10 +163,16 @@ spec:
             - name: EMAIL_FROM
               value: {{ .Values.notifier.env.EMAIL_FROM | quote }}
 
+            # GEMINI API KEY
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: tubemind-secrets  
+                  key: GEMINI_API_KEY
           resources:
             requests:
-              cpu: "50m"
-              memory: "128Mi"
+              cpu: "200m"
+              memory: "256Mi"
             limits:
               cpu: "500m"
               memory: "512Mi"
@@ -221,7 +227,7 @@ spec:
 
             # -------- [BỔ SUNG] MINIO (BẮT BUỘC PHẢI CÓ) --------
             - name: MINIO_ENDPOINT
-              value: "s3.amazonaws.com"
+              value: {{ .Values.api.env.MINIO_ENDPOINT | quote }}
             - name: MINIO_BUCKET_NAME
               value: {{ .Values.external.s3.bucketName | quote }}
             - name: MINIO_SECURE
@@ -250,11 +256,13 @@ spec:
                 secretKeyRef:
                   name: tubemind-secrets
                   key: SMTP_USER
+                  optional: true
             - name: SMTP_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: tubemind-secrets
                   key: SMTP_PASSWORD
+                  optional: true
 
           resources:
             requests:
