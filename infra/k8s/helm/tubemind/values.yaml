@@ -1,3 +1,9 @@
+tags:
+  api: true
+  workers: true
+  infra: true
+  monitoring: true
+  
 global:
 
   ecrRegistry: "039968205787.dkr.ecr.us-east-1.amazonaws.com" # <--- Thay bằng output của Terraform

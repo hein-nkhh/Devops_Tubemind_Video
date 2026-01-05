@@ -1,3 +1,4 @@
+{{- if .Values.tags.api -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -125,3 +126,4 @@ spec:
       port: 8000
       targetPort: 8000
       nodePort: 30000
+{{- end -}}
